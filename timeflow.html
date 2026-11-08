@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TimeFlow - 成果が見える、続く。完了日ベースのタスク管理システム</title>
+    <!-- Google Fonts & FontAwesome Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-app: #f8fafc;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            --success: #10b981;
+            --border: #e2e8f0;
+            --shadow: 0 10px 25px -5px rgb(0 0 0 / 0.05), 0 8px 10px -6px rgb(0 0 0 / 0.05);
+            --radius: 16px;
+            --transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-app);
+            color: var(--text-main);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* ナビゲーションバー */
+        header {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            background: rgba(248, 250, 252, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            z-index: 100;
+            transition: var(--transition);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 18px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-main);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 15px;
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .btn-nav {
+            background: var(--primary-gradient);
+            color: white !important;
+            padding: 10px 20px;
+            border-radius: 30px;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+        }
+
+        .btn-nav:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(79, 70, 229, 0.3);
+        }
+
+        /* 共通セクションスタイル */
+        section {
+            padding: 100px 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            letter-spacing: -0.02em;
+        }
+
+        .section-subtitle {
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 18px;
+            max-width: 600px;
+            margin: 0 auto 60px auto;
+        }
+
+        /* ヒーローセクション */
+        .hero-section {
+            padding-top: 160px;
+            padding-bottom: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .hero-badge {
+            background: rgba(79, 70, 229, 0.08);
+            color: var(--primary);
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            animation: fadeInDown 0.8s ease-out;
+        }
+
+        .hero-title {
+            font-size: 56px;
+            font-weight: 800;
+            line-height: 1.15;
+            letter-spacing: -0.03em;
+            margin-bottom: 24px;
+            max-width: 850px;
+            animation: fadeInUp 0.8s ease-out;
+        }
+
+        .hero-title span {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-desc {
+            font-size: 20px;
+            color: var(--text-muted);
+            max-width: 650px;
+            margin-bottom: 40px;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero-btns {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 60px;
+            animation: fadeInUp 1.2s ease-out;
+        }
+
+        .btn-main {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 36px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 30px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .btn-main-primary {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.25);
+        }
+
+        .btn-main-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(79, 70, 229, 0.35);
+        }
+
+        .btn-main-secondary {
+            background: var(--bg-card);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+        }
+
+        .btn-main-secondary:hover {
+            background: #f1f5f9;
+            transform: translateY(-3px);
+        }
+
+        /* ヒーローモックアップアニメーション */
+        .hero-mockup {
+            width: 100%;
+            max-width: 1000px;
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: 0 30px 60px -15px rgb(0 0 0 / 0.12), 0 18px 36px -18px rgb(0 0 0 / 0.15);
+            border: 1px solid var(--border);
+            padding: 12px;
+            animation: mockupFloat 6s ease-in-out infinite, fadeInUp 1.4s ease-out;
+        }
+
+        .mockup-header {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 12px;
+        }
+
+        .mockup-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #cbd5e1;
+        }
+
+        .mockup-img {
+            width: 100%;
+            height: auto;
+            border-radius: 8px;
+            display: block;
+            background: #f8fafc;
+            padding: 40px;
+            text-align: center;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* 機能一覧グリッド */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 30px;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            padding: 40px 30px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        .feature-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px -10px rgb(0 0 0 / 0.08);
+            border-color: var(--primary);
+        }
+
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            background: rgba(79, 70, 229, 0.06);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            margin-bottom: 24px;
+            transition: var(--transition);
+        }
+
+        .feature-card:hover .feature-icon {
+            background: var(--primary);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .feature-card h3 {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .feature-card p {
+            color: var(--text-muted);
+            font-size: 15px;
+        }
+
+        /* カレンダー特化セクション */
+        .calendar-highlight {
+            display: flex;
+            align-items: center;
+            gap: 60px;
+            background: var(--bg-card);
+            border-radius: 24px;
+            padding: 60px;
+            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
+            margin: 40px auto;
+            opacity: 0;
+            transform: translateY(40px);
+            transition: var(--transition);
+        }
+
+        .calendar-highlight.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .calendar-text {
+            flex: 1;
+        }
+
+        .calendar-visual {
+            flex: 1;
+            background: var(--bg-app);
+            border-radius: var(--radius);
+            padding: 30px;
+            border: 1px solid var(--border);
+        }
+
+        /* 料金プランセクション */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            max-width: 1050px;
+            margin: 0 auto;
+        }
+
+        .pricing-card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+            padding: 45px 35px;
+            box-shadow: var(--shadow);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            transition: var(--transition);
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        .pricing-card.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .pricing-card.popular {
+            border: 2px solid var(--primary);
+            transform: scale(1.03);
+        }
+
+        .pricing-card.popular.visible {
+            transform: scale(1.03) translateY(0);
+        }
+
+        .pricing-card.popular:hover {
+            transform: scale(1.05) translateY(-5px);
+        }
+
+        .pricing-card:hover:not(.popular) {
+            transform: translateY(-8px);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: -14px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary-gradient);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+        }
+
+        .plan-name {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .plan-desc {
+            color: var(--text-muted);
+            font-size: 14px;
+            margin-bottom: 24px;
+            min-height: 44px;
+        }
+
+        .plan-price {
+            font-size: 40px;
+            font-weight: 800;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: baseline;
+            gap: 4px;
+        }
+
+        .plan-price span {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .plan-features {
+            list-style: none;
+            margin-bottom: 35px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .plan-features li {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 15px;
+        }
+
+        .plan-features i {
+            color: var(--success);
+            font-size: 16px;
+        }
+
+        .btn-pricing {
+            width: 100%;
+            text-align: center;
+            padding: 14px;
+            border-radius: 30px;
+            font-weight: 600;
+            text-decoration: none;
+            margin-top: auto;
+            transition: var(--transition);
+        }
+
+        .btn-pricing-secondary {
+            background: #f1f5f9;
+            color: var(--text-main);
+        }
+
+        .btn-pricing-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-pricing-primary {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 6px 18px rgba(79, 70, 229, 0.2);
+        }
+
+        .btn-pricing-primary:hover {
+            box-shadow: 0 10px 25px rgba(79, 70, 229, 0.3);
+        }
+
+        /* フッター */
+        footer {
+            border-top: 1px solid var(--border);
+            background: var(--bg-card);
+            padding: 40px 24px;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        /* アニメーションキーフレーム定義 */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes mockupFloat {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-12px); }
+            100% { transform: translateY(0px); }
+        }
+
+        /* レスポンシブ */
+        @media (max-width: 968px) {
+            .hero-title { font-size: 40px; }
+            .calendar-highlight { flex-direction: column; padding: 40px 24px; gap: 30px; }
+            .nav-links li:not(.nav-cta) { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ナびゲーション -->
+    <header>
+        <div class="nav-container">
+            <a href="#" class="logo">
+                <i class="fa-solid fa-clock-rotate-left"></i>
+                <span>TimeFlow</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="#features">機能特徴</a></li>
+                <li><a href="#calendar-concept">完了カレンダー</a></li>
+                <li><a href="#pricing">料金プラン</a></li>
+                <li class="nav-cta"><a href="#" class="btn-nav">無料で開始</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <!-- ヒーローセクション -->
+    <section class="hero-section">
+        <div class="hero-badge">完全ローカル動作・プライバシー最優先</div>
+        <h1 class="hero-title">成果が見える、続く。<br><span>完了日ベース</span>の究極タスク管理</h1>
+        <p class="hero-desc">タイムトラッカー、カウントダウン期限自動ソート、そしてやり遂げた実績だけを刻むカレンダー。あなたの生産性を劇的に変える美しき仕事空間。</p>
+        <div class="hero-btns">
+            <a href="#" class="btn-main btn-main-primary">今すぐ無料で開始 <i class="fa-solid fa-arrow-right"></i></a>
+            <a href="#features" class="btn-main btn-main-secondary">機能を見る</a>
+        </div>
+        <div class="hero-mockup">
+            <div class="mockup-header">
+                <span class="mockup-dot"></span>
+                <span class="mockup-dot"></span>
+                <span class="mockup-dot"></span>
+            </div>
+            <div class="mockup-img">
+                <i class="fa-solid fa-laptop-code" style="font-size: 48px; margin-bottom: 16px; color: var(--primary);"></i>
+                <p>TimeFlow App Workspace (Sidebar Fixed, Dashboard, Timer Grid Mode)</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 機能特徴セクション -->
+    <section id="features">
+        <h2 class="section-title">生産性を最大化するコア設計</h2>
+        <p class="section-subtitle">ただタスクを並べるだけではありません。時間を計測し、期限を意識し、結果を振り返るためのすべてが揃っています。</p>
+        
+        <div class="features-grid">
+            <div class="feature-card animate-scroll">
+                <div class="feature-icon"><i class="fa-solid fa-stopwatch"></i></div>
+                <h3>高精度タイムトラッカー</h3>
+                <p>各タスクの作業時間を個別・並行してリアルタイムに計測。リロードしても正確な経過時間がバックグラウンドで維持されます。</p>
+            </div>
+
+            <div class="feature-card animate-scroll">
+                <div class="feature-icon"><i class="fa-solid fa-hourglass-half"></i></div>
+                <h3>期限ソート＆カウントダウン</h3>
+                <p>タスク追加時に終了期限をセット（初期設定は翌日）。期限が近い順に自動整列し、残り時間をカラーバッジで直感的に警告します。</p>
+            </div>
+
+            <div class="feature-card animate-scroll">
+                <div class="feature-icon"><i class="fa-solid fa-rotate-left"></i></div>
+                <h3>安心のタイマーリセット</h3>
+                <p>間違えてタイマーを動かしてしまっても安心。専用のカスタム警告ポップアップを介して、安全に計測記録を0秒に戻せます。</p>
+            </div>
+
+            <div class="feature-card animate-scroll">
+                <div class="feature-icon"><i class="fa-solid fa-sliders"></i></div>
+                <h3>固定サイドバー＆2大ビュー</h3>
+                <p>全体の進捗を常に左側でホールド。情報集約型の「ダッシュボード」と、操作集中型の「タスク一覧」をシームレスに切り替えられます。</p>
+            </div>
+
+            <div class="feature-card animate-scroll">
+                <div class="feature-icon"><i class="fa-solid fa-moon"></i></div>
+                <h3>完璧なダークモード対応</h3>
+                <p>ワンタップで昼夜の環境に完全最適化。設定カラーは自動保存され、あなたの瞳の負担をいつでも和らげます。</p>
+            </div>
+
+            <div class="feature-card animate-scroll">
+                <div class="feature-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                <h3>100%ローカル保存</h3>
+                <p>データはすべてお使いのブラウザ（LocalStorage）にのみ安全に保存。外部サーバーに情報が漏洩する心配は一切ありません。</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- カレンダー特徴解説セクション -->
+    <section id="calendar-concept" style="background: rgba(241, 245, 249, 0.5); border-radius: 32px; max-width: 1152px;">
+        <div class="calendar-highlight animate-scroll">
+            <div class="calendar-text">
+                <div class="hero-badge" style="margin-bottom: 16px;">New Concept</div>
+                <h2 style="font-size: 32px; font-weight: 800; margin-bottom: 20px; line-height: 1.3;">未完了の山に怯えない。<br>「やり遂げた日」だけを刻む</h2>
+                <p style="color: var(--text-muted); font-size: 16px; margin-bottom: 20px;">一般的なカレンダーは「予定や期限」に追われる場所でした。TimeFlowは違います。まだ終わっていないタスクの期限日はカレンダーに一切表示されません。</p>
+                <p style="color: var(--text-muted); font-size: 16px;">あなたがチェックボックスを押し、**本当にタスクを完了した日（実績）**だけが美しくマッピングされます。過去の自分のがんばりを一目で称えられる、究極のモチベーション設計です。</p>
+            </div>
+            <div class="calendar-visual">
+                <div style="text-align: center; padding: 40px 20px; color: var(--text-muted);">
+                    <i class="fa-regular fa-calendar-check" style="font-size: 48px; color: var(--success); margin-bottom: 16px;"></i>
+                    <p style="font-weight: 600; color: var(--text-main);">実績特化型カレンダービュー</p>
+                    <span style="font-size: 13px;">※完了タスクだけがその完了日に美しく記録されます</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 料金プランセクション -->
+    <section id="pricing">
+        <h2 class="section-title">シンプルで透明なプラン</h2>
+        <p class="section-subtitle">完全無料で使用することができます。</p>
+
+        <div class="pricing-grid">
+            <!-- Free Plan -->
+            <div class="pricing-card animate-scroll">
+                <div class="plan-name">Free</div>
+                <div class="plan-desc">このサービスは完全無料です</div>
+                <div class="plan-price">¥0 <span>/ 永年無料</span></div>
+                <ul class="plan-features">
+                    <li><i class="fa-solid fa-circle-check"></i> タスク無制限追加</li>
+                    <li><i class="fa-solid fa-circle-check"></i> タイムトラッキング機能</li>
+                    <li><i class="fa-solid fa-circle-check"></i> 完了日限定カレンダー</li>
+                    <li><i class="fa-solid fa-circle-check"></i> ブラウザローカル保存</li>
+                </ul>
+                <a href="#" class="btn-pricing btn-pricing-secondary">無料で始める</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- フッター -->
+    <footer>
+        <p>&copy; 2026 TimeFlow Inc. All rights reserved. Designed for ultimate focus and productivity.</p>
+    </footer>
+
+    <!-- スクロールアニメーション用JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const scrollElements = document.querySelectorAll('.animate-scroll');
+
+            const elementInView = (el, dividend = 1) => {
+                const elementTop = el.getBoundingClientRect().top;
+                return (
+                    elementTop <= (window.innerHeight || document.documentElement.clientHeight) / dividend
+                );
+            };
+
+            const displayScrollElement = (element) => {
+                element.classList.add('visible');
+            };
+
+            const handleScrollAnimation = () => {
+                scrollElements.forEach((el) => {
+                    if (elementInView(el, 1.15)) {
+                        displayScrollElement(el);
+                    }
+                })
+            }
+
+            // 初期チェックとスクロールイベントの登録
+            window.addEventListener('scroll', () => { 
+                handleScrollAnimation();
+            });
+            
+            // 初回表示時にも実行
+            setTimeout(handleScrollAnimation, 100);
+        });
+    </script>
+</body>
+</html>
